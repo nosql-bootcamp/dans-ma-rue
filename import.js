@@ -10,8 +10,8 @@ async function run() {
   const client = new Client({ node: config.get('elasticsearch.uri') });
 
   // Création de l'indice
-  client.indices.delete({index: indexName})
-  client.indices.create({
+  await client.indices.delete({index: indexName})
+  await client.indices.create({
     index: indexName,
     body: {
       "mappings": {
@@ -25,8 +25,6 @@ async function run() {
         }
       }
     }
-  }, (err, resp) => {
-    if (err) console.trace(err.message);
   });
 
 
@@ -37,7 +35,6 @@ async function run() {
             separator: ';'
         }))
         .on('data', (data) => {
-            //console.log(data);
             anomalies.push({
                 "timestamp" : data.DATEDECL,
                 "object_id" : data.NUMERO,
@@ -55,13 +52,14 @@ async function run() {
             });
         })
         .on('end', async () => {
-            console.log(anomalies.length)
             while(anomalies.length>0){
-                anms = []
-                while (anms.length<1000 && anomalies.length>0){
+                let anms = []
+                while (anms.length<10000 && anomalies.length>0){
                     anms.push(anomalies.pop());
                 }
-                let result = await client.bulk(createBulkInsertQuery(anms)).catch(console.error)
+                console.log(anomalies.length);
+                let bulk = createBulkInsertQuery(anms);
+                let result = await client.bulk(bulk).catch(console.error)
                 if(result.body.errors || result.statusCode!=200){
                   console.log(result)
                 }
@@ -88,9 +86,10 @@ function createBulkInsertQuery(anomalies) {
       conseil_de_quartier,
       location
     } = anomalie;
-    acc.push({ index: { _index: indexName, _type: '_doc', _id: object_id } });
+    acc.push({ index: { _index: indexName, _type: '_doc' } });
     res = {
       timestamp,
+      object_id,
       annee_declaration,
       mois_declaration,
       type,
