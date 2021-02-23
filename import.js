@@ -8,6 +8,11 @@ async function run() {
     // Create Elasticsearch client
     const client = new Client({ node: config.get('elasticsearch.uri') });
 
+    if(client.indices.exists({ index: indexName})) {
+        client.indices.delete({ index: indexName }, (err, resp) => {
+            if (err) console.trace(err.message);})
+    }
+    
     client.indices.create({ index: indexName }, (err, resp) => {
         if (err) console.trace(err.message);
         else {
