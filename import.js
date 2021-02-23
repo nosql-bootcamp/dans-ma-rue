@@ -4,12 +4,7 @@ const fs = require('fs');
 const { Client } = require('@elastic/elasticsearch');
 const indexName = config.get('elasticsearch.index_name');
 
-const toTimestamp = data => {
-    const date = data["DATEDECL"];
-    const [year, month, day] = date.split("-").map(e => Number(e))
-
-    return new Date(year, month, day, 0, 0);
-}
+const toTimestamp = data => data["DATEDECL"]
 
 const clean = val => {
     if (!val) return null;
@@ -32,7 +27,7 @@ async function run () {
         .on('data', (data) => {
             DATA.push({ "index" : { "_index" : "dansmarue", "_type" : "entry" } });
             let entries = {"@timestamp": toTimestamp(data)}
-            for (const entry of Object.keys(data)) {
+            for (const entry of Object.keys(data).filter(k => k!=='DATEDECL')) {
                 entries[String(entry).replace(' ', '_').toLowerCase()] = clean(data[entry])
             }
             DATA.push(entries);
