@@ -9,7 +9,7 @@
     "moment": "^2.29.1"
   },
   "scripts": {
-    "import": "node import.js",
+    "import": "node --max-old-space-size=8192 import.js",
     "dev": "nodemon server.js",
     "start": "node server.js"
   },

@@ -4,6 +4,7 @@ const fs = require('fs');
 const { Client } = require('@elastic/elasticsearch');
 const indexName = config.get('elasticsearch.index_name');
 
+<<<<<<< HEAD
 Array.range = function (n) {
   // Array.range(5) --> [0,1,2,3,4]
   return Array.apply(null, Array(n)).map((x, i) => i)
@@ -14,6 +15,8 @@ Object.defineProperty(Array.prototype, 'chunk', {
 
     // ACTUAL CODE FOR CHUNKING ARRAY:
     return Array.range(Math.ceil(this.length / n)).map((x, i) => this.slice(i * n, i * n + n));
+=======
+>>>>>>> wip
 
   }
 });
@@ -41,39 +44,53 @@ async function run() {
     if (err) console.trace(err.message);
   });
 
-  let anomalies = [];
-  // Read CSV file
-  fs.createReadStream('dataset/dans-ma-rue.csv')
-    .pipe(csv({
-      separator: ';'
-    }))
-    .on('data', (data) => {
-      //console.log(data);
-      anomalies.push({
-        "timestamp": data.DATEDECL,
-        "object_id": data.NUMERO,
-        "annee_declaration": data['ANNEE DECLARATION'],
-        "mois_declaration": data['MOIS DECLARATION'],
-        "type": data.TYPE,
-        "sous_type": data.SOUSTYPE,
-        "code_postal": data.CODE_POSTAL,
-        "ville": data.VILLE,
-        "arrondissement": data.ARRONDISSEMENT,
-        "prefixe": data.PREFIXE,
-        "intervenant": data.INTERVANANT,
-        "conseil_de_quartier": data['CONSEIL DE QUARTIER'],
-        "location": data.geo_point_2d
-      });
-    })
-    .on('end', () => {
-      anomalies.chunk(100).forEach((anms) => {
-        client.bulk(createBulkInsertQuery(anms), (err, resp) => {
-          if (err) console.trace(err.message);
-          else console.log(`Inserted ${resp.body.items.length} anomalies`);
+
+    let anomalies = [];
+    // Read CSV file
+    fs.createReadStream('dataset/dans-ma-rue.csv')
+        .pipe(csv({
+            separator: ';'
+        }))
+        .on('data', (data) => {
+            //console.log(data);
+            anomalies.push({
+                "timestamp" : data.DATEDECL,
+                "object_id" : data.NUMERO,
+                "annee_declaration" : data['ANNEE DECLARATION'],
+                "mois_declaration" : data['MOIS DECLARATION'],
+                "type" : data.TYPE,
+                "sous_type" : data.SOUSTYPE,
+                "code_postal" : data.CODE_POSTAL,
+                "ville" : data.VILLE,
+                "arrondissement" : data.ARRONDISSEMENT,
+                "prefixe" : data.PREFIXE,
+                "intervenant" : data.INTERVANANT,
+                "conseil_de_quartier" : data['CONSEIL DE QUARTIER'],
+                "location" : data.geo_point_2d
+            });
+            /*if(anomalies.length>=1000){
+                client.bulk(createBulkInsertQuery(anomalies), (err, resp) => {
+                    if (err) console.trace(err.message);
+                    else console.log(`Inserted ${resp.body.items.length} anomalies`);
+                });
+                anomalies = [];
+            }*/
+        })
+        .on('end', () => {
+            console.log(anomalies.length)
+            while(anomalies.length>0){
+                anms = []
+                while (anms.length<1000 && anomalies.length>0){
+                    anms.push(anomalies.pop());
+                }
+                client.bulk(createBulkInsertQuery(anms), (err, resp) => {
+                    if (err) console.trace(err.message);
+                    //else console.log(`Inserted ${resp.body.items.length} anomalies`);
+                });
+            }
+            client.close();
         });
-        client.close();
-      })
-    });
+
 }
 
 function createBulkInsertQuery(anomalies) {
