@@ -106,6 +106,38 @@ exports.statsByMonth = (client, callback) => {
 }
 
 exports.statsPropreteByArrondissement = (client, callback) => {
-    // TODO Trouver le top 3 des arrondissements avec le plus d'anomalies concernant la propreté
-    callback([]);
+    // Trouve le top 3 des arrondissements avec le plus d'anomalies concernant la propreté
+    res = client.search({
+        index: indexName,
+        body: {
+            "size": 0,
+            "query": {
+                "term": {
+                    "type.keyword": {
+                        "value": "Propreté"
+                    }
+                }
+            },
+            "aggs": {
+                "count_by_arrondissement": {
+                    "terms": {
+                        "field": "arrondissement.keyword"
+                    }
+                }
+            }
+        }
+    }).then(res => {
+        let list = [];
+        let buckets = res.body.aggregations.count_by_arrondissement.buckets;
+        let cpt = 0;
+        for (let bucket of buckets) {
+            if (cpt >= 3) { break; }
+            list.push({ "arrondissement": bucket.key, "count": bucket.doc_count });
+            cpt++;
+        }
+        callback(list)
+    })
+        .catch(err => {
+            console.log(err)
+        });
 }
