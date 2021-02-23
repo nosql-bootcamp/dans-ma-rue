@@ -12,7 +12,7 @@ async function run() {
         client.indices.delete({ index: indexName }, (err, resp) => {
             if (err) console.trace(err.message);})
     }
-    
+
     client.indices.create({ index: indexName }, (err, resp) => {
         if (err) console.trace(err.message);
         else {
@@ -74,6 +74,7 @@ async function run() {
                 await client.bulk({ body }).catch(console.error)
                 console.log("Inserted ", body.length)
             })
+            client.close()
         })
 }
 
