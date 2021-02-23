@@ -4,24 +4,56 @@ const fs = require('fs');
 const { Client } = require('@elastic/elasticsearch');
 const indexName = config.get('elasticsearch.index_name');
 
+const toTimestamp = data => {
+    const date = data["DATEDECL"];
+    const [year, month, day] = date.split("-").map(e => Number(e))
+
+    return new Date(year, month, day, 0, 0);
+}
+
+const clean = val => {
+    if (!val) return null;
+
+    const cleaned = val.replace("<", "").replace("ND", "");
+    return cleaned === "" ? null : parseInt(cleaned);
+}
+
 async function run () {
     // Create Elasticsearch client
     const client = new Client({ node: config.get('elasticsearch.uri') });
 
-    // TODO il y a peut être des choses à faire ici avant de commencer ... 
-
+    const DATA = []
     // Read CSV file
     fs.createReadStream('dataset/dans-ma-rue.csv')
         .pipe(csv({
             separator: ';'
         }))
         .on('data', (data) => {
-            // TODO ici on récupère les lignes du CSV ...
-            console.log(data);
+            DATA.push({ "index" : { "_index" : "dansmarue", "_type" : "entry" } });
+            let entries = {"@timestamp": toTimestamp(data)}
+            for (const entry of Object.keys(data)) {
+                entries[entry] = clean(data[entry])
+            }
+            DATA.push(entries);
+
         })
         .on('end', () => {
-            // TODO il y a peut être des choses à faire à la fin aussi ?
-            console.log('Terminated!');
+            const sliceLen = Math.trunc(DATA.length / 5)
+            for (let i = 0; i < 4; i++) {
+                client.bulk({
+                    body: DATA.slice(i*sliceLen, (i+1)*sliceLen)
+                }, (err, resp) => {
+                    if (err) { throw err; }
+                    console.info(`${resp.body.items.length} data inserted`);
+                });
+            }
+            client.bulk({
+                body: DATA.slice(4*sliceLen)
+            }, (err, resp) => {
+                if (err) { throw err; }
+                console.info(`${resp.body.items.length} data inserted`);
+            });
+            console.info('Terminated!');
         });
 }
 
