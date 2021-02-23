@@ -30,13 +30,21 @@ exports.countAround = (client, lat, lon, radius, callback) => {
         index: indexName,
         body: {
             query: {
-                range: {
-                    timestamp: {
-                        gte: lon,
-                        lt: to
+                bool: {
+                  must: {
+                    match_all: {}
+                  },
+                  filter: {
+                    geo_distance: {
+                      distance: radius,
+                      location: {
+                        lat: lat,
+                        lon: lon
+                      }
                     }
+                  }
                 }
-            }
+              }
         }
     })
     .then(resp => {

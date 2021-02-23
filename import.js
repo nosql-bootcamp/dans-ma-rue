@@ -8,10 +8,35 @@ async function run() {
     // Create Elasticsearch client
     const client = new Client({ node: config.get('elasticsearch.uri') });
 
-    // TODO il y a peut être des choses à faire ici avant de commencer ... 
-    // client.indices.create({ index: indexName }, (err, resp) => {
-    //     if (err) console.trace(err.message);
-    // });
+    client.indices.create({ index: indexName }, (err, resp) => {
+        if (err) console.trace(err.message);
+        else {
+            client.indices.putMapping({
+                index: indexName,
+                body: {
+                    properties: {
+                        location: { type: 'geo_point' }
+                    }
+                }
+            });
+        }
+    });
+    // client.indices.delete({ index: indexName }).then(() => {
+    //     client.indices.create({ index: indexName }, (err, resp) => {
+    //         if (err) console.trace(err.message);
+    //         else {
+    //             client.indices.putMapping({
+    //                 index: indexName,
+    //                 body: {
+    //                     properties: {
+    //                         location: { type: 'geo_point' }
+    //                     }
+    //                 }
+    //             });
+    //         }
+    //     });
+    // })
+
     let anomalies = [];
     // Read CSV file
     fs.createReadStream('dataset/dans-ma-rue.csv')
@@ -96,7 +121,7 @@ function createBulkInsertQuery(anomalies, count) {
 function split(array, n) {
     var res = [];
     while (array.length) {
-      res.push(array.splice(0, n));
+        res.push(array.splice(0, n));
     }
     return res;
-  }
+}

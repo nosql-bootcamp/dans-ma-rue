@@ -32,7 +32,6 @@ app.get('/_count', function (req, res) {
 });
 
 app.get('/around/_count', function (req, res) {
-    console.log("got here");
     const lat = req.query.lat;
     const lon = req.query.lon;
     const radius = req.query.radius;
