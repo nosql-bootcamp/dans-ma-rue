@@ -23,18 +23,22 @@ exports.count = (client, from, to, callback) => {
 }
 
 exports.countAround = (client, lat, lon, radius, callback) => {
-    callback({
-        count: client
-            .count({
-                index: indexName,
-                body: {
-                    query: {
-                        geo_distance: {
-                            "distance": radius,
-                            "location": lat + "," + lon
-                        }
-                    }
+
+    res = client.count({
+        index: indexName,
+        body: {
+            query: {
+                geo_distance: {
+                    "distance": radius,
+                    "location": lat + "," + lon
                 }
-            })
+            }
+        }
+    }).then(res => {
+        callback({ count: res.body.count })
     })
+        .catch(err => {
+            console.log(err)
+        });
+
 }
