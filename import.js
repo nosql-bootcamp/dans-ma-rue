@@ -23,6 +23,7 @@ async function run () {
     const client = new Client({ node: config.get('elasticsearch.uri') });
 
     const DATA = []
+    let totDataIns = 0
     // Read CSV file
     fs.createReadStream('dataset/dans-ma-rue.csv')
         .pipe(csv({
@@ -32,7 +33,7 @@ async function run () {
             DATA.push({ "index" : { "_index" : "dansmarue", "_type" : "entry" } });
             let entries = {"@timestamp": toTimestamp(data)}
             for (const entry of Object.keys(data)) {
-                entries[entry] = clean(data[entry])
+                entries[String(entry).replace(' ', '_').toLowerCase()] = clean(data[entry])
             }
             DATA.push(entries);
 
@@ -41,18 +42,15 @@ async function run () {
             const sliceLen = Math.trunc(DATA.length / 5)
             for (let i = 0; i < 4; i++) {
                 client.bulk({
-                    body: DATA.slice(i*sliceLen, (i+1)*sliceLen)
+                    body: DATA.slice(i*sliceLen, i!==5 ? (i+1)*sliceLen: DATA.length)
                 }, (err, resp) => {
                     if (err) { throw err; }
-                    console.info(`${resp.body.items.length} data inserted`);
+                    const {length} = resp.body.items
+                    totDataIns += length
+                    console.info(`${length} data inserted`);
+                    console.info(`${totDataIns} data inserted in total`);
                 });
             }
-            client.bulk({
-                body: DATA.slice(4*sliceLen)
-            }, (err, resp) => {
-                if (err) { throw err; }
-                console.info(`${resp.body.items.length} data inserted`);
-            });
             console.info('Terminated!');
         });
 }
