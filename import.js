@@ -23,7 +23,19 @@ async function run () {
     const client = new Client({ node: config.get('elasticsearch.uri') });
 
     // Création de l'indice
-    client.indices.create({ index: indexName }, (err, resp) => {
+    client.indices.create({ 
+        index: indexName,
+        body:{
+            "mappings": {
+              "properties": {
+                "timestamp": {
+                  "type":   "date",
+                  "format": "yyyy-MM-dd"
+                }
+              }
+            }
+          }
+    }, (err, resp) => {
         if (err) console.trace(err.message);
     });
 
