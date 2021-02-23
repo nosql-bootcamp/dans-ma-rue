@@ -1,5 +1,9 @@
 # Dans Ma Rue
 
+### Carrez Robin, Daillet Evrard-Nil, Tek Barthélémy
+
+## Sujet
+
 L'objectif de cet exerice est d'analyser les données de l'application mobile `DansMaRue - Paris` avec `Elasticsearch`.
 
 `DansMaRue - Paris` est une application mobile permettant de transmettre les anomalies de la voie publique à Paris.
@@ -15,8 +19,7 @@ L'objectif de cet exerice est d'analyser les données de l'application mobile `D
 ## Dataset
 
 Les données sont disponibles sur la plateforme Open Data de Paris : https://opendata.paris.fr/explore/dataset/dans-ma-rue
-
-La version du dataset utilisée est celle du vendredi 31 janvier 2020, dont une copie se trouve au format `zip` dans le dossier `dataset`.
+-ndredi 31 janvier 2020, dont une copie se trouve au format `zip` dans le dossier `dataset`.
 
 ## Import des données dans Elasticsearch
 
@@ -393,7 +396,7 @@ Dans Kibana, créez un dashboard qui permet de visualiser :
 
 Faites une capture d'écran du dashboard et ajoutez le au dépôt afin qu'il soit visible dans ce readme :
 
-![](https://via.placeholder.com/800x600.png?text=Votre+Dashboard+Ici)
+![](https://github.com/bart-tek/dans-ma-rue/blob/master/img/dashboard.JPG)
 
 ## Pour rendre le travail
 
