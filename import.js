@@ -4,28 +4,13 @@ const fs = require('fs');
 const { Client } = require('@elastic/elasticsearch');
 const indexName = config.get('elasticsearch.index_name');
 
-<<<<<<< HEAD
-Array.range = function (n) {
-  // Array.range(5) --> [0,1,2,3,4]
-  return Array.apply(null, Array(n)).map((x, i) => i)
-};
-
-Object.defineProperty(Array.prototype, 'chunk', {
-  value: function (n) {
-
-    // ACTUAL CODE FOR CHUNKING ARRAY:
-    return Array.range(Math.ceil(this.length / n)).map((x, i) => this.slice(i * n, i * n + n));
-=======
->>>>>>> wip
-
-  }
-});
 
 async function run() {
   // Create Elasticsearch client
   const client = new Client({ node: config.get('elasticsearch.uri') });
 
   // Création de l'indice
+  client.indices.delete({index: indexName})
   client.indices.create({
     index: indexName,
     body: {
@@ -68,25 +53,18 @@ async function run() {
                 "conseil_de_quartier" : data['CONSEIL DE QUARTIER'],
                 "location" : data.geo_point_2d
             });
-            /*if(anomalies.length>=1000){
-                client.bulk(createBulkInsertQuery(anomalies), (err, resp) => {
-                    if (err) console.trace(err.message);
-                    else console.log(`Inserted ${resp.body.items.length} anomalies`);
-                });
-                anomalies = [];
-            }*/
         })
-        .on('end', () => {
+        .on('end', async () => {
             console.log(anomalies.length)
             while(anomalies.length>0){
                 anms = []
                 while (anms.length<1000 && anomalies.length>0){
                     anms.push(anomalies.pop());
                 }
-                client.bulk(createBulkInsertQuery(anms), (err, resp) => {
-                    if (err) console.trace(err.message);
-                    //else console.log(`Inserted ${resp.body.items.length} anomalies`);
-                });
+                let result = await client.bulk(createBulkInsertQuery(anms)).catch(console.error)
+                if(result.body.errors || result.statusCode!=200){
+                  console.log(result)
+                }
             }
             client.close();
         });
