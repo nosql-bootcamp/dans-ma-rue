@@ -15,6 +15,7 @@ app.get('/', function (req, res) {
 });
 
 app.get('/_count', function (req, res) {
+    console.log("zeifozjefoij");
     const from = req.query.from;
     const to = req.query.to;
     if (from !== undefined && !moment(from, 'YYYY-MM-DD', true).isValid()) {
@@ -31,6 +32,7 @@ app.get('/_count', function (req, res) {
 });
 
 app.get('/around/_count', function (req, res) {
+    console.log("got here");
     const lat = req.query.lat;
     const lon = req.query.lon;
     const radius = req.query.radius;
