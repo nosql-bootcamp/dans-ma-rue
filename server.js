@@ -15,7 +15,6 @@ app.get('/', function (req, res) {
 });
 
 app.get('/_count', function (req, res) {
-    console.log("zeifozjefoij");
     const from = req.query.from;
     const to = req.query.to;
     if (from !== undefined && !moment(from, 'YYYY-MM-DD', true).isValid()) {

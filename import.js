@@ -26,22 +26,7 @@ async function run() {
             });
         }
     });
-    // client.indices.delete({ index: indexName }).then(() => {
-    //     client.indices.create({ index: indexName }, (err, resp) => {
-    //         if (err) console.trace(err.message);
-    //         else {
-    //             client.indices.putMapping({
-    //                 index: indexName,
-    //                 body: {
-    //                     properties: {
-    //                         location: { type: 'geo_point' }
-    //                     }
-    //                 }
-    //             });
-    //         }
-    //     });
-    // })
-
+    
     let anomalies = [];
     // Read CSV file
     fs.createReadStream('dataset/dans-ma-rue.csv')
