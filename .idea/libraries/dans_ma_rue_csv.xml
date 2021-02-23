@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="dans-ma-rue.csv">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/dataset/dans-ma-rue.csv.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
